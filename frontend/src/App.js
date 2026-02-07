@@ -50,6 +50,7 @@ function App() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/group-analytics" element={<GroupAnalytics />} />
+          <Route path="/leads" element={<Leads />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
