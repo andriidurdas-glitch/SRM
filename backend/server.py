@@ -27,6 +27,8 @@ class PlayerCreate(BaseModel):
     group_id: Optional[str] = None
     notes: Optional[str] = ""
     jersey_number: Optional[int] = None
+    status: Optional[str] = "active"
+    injury_notes: Optional[str] = ""
 
 class Player(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -37,6 +39,25 @@ class Player(BaseModel):
     group_id: Optional[str] = None
     notes: Optional[str] = ""
     jersey_number: Optional[int] = None
+    status: Optional[str] = "active"
+    injury_notes: Optional[str] = ""
+    created_at: str
+
+class LeadCreate(BaseModel):
+    child_name: str
+    parent_contact: str
+    trial_date: str
+    notes: Optional[str] = ""
+    status: Optional[str] = "scheduled"
+
+class Lead(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    child_name: str
+    parent_contact: str
+    trial_date: str
+    notes: Optional[str] = ""
+    status: str
     created_at: str
 
 class GroupCreate(BaseModel):
