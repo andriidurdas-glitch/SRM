@@ -191,13 +191,19 @@ const Groups = () => {
           const stats = groupStats[group.id];
           return (
             <Card key={group.id} data-testid={`group-card-${group.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 mb-4">
                 <div className="bg-zinc-100 p-3 rounded-sm">
                   <UsersThree size={32} weight="duotone" className="text-zinc-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-heading text-xl font-bold truncate">{group.name}</h3>
-                  <p className="text-sm text-muted-foreground">Гравців: {group.player_count}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="bg-primary/10 px-3 py-1 rounded-sm">
+                      <p className="text-sm font-bold text-primary">
+                        👥 {group.player_count} {group.player_count === 1 ? 'гравець' : group.player_count < 5 ? 'гравці' : 'гравців'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
               
