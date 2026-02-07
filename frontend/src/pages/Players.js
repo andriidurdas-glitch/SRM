@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash, UserCircle, ArrowLeft, UsersThree } from '@phosphor-icons/react';
+import { Plus, Pencil, Trash, UserCircle, ArrowLeft, UsersThree, MagnifyingGlass, SortAscending, Warning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,11 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const Players = () => {
   const [groups, setGroups] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [filteredPlayers, setFilteredPlayers] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [playerStats, setPlayerStats] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -37,6 +40,10 @@ const Players = () => {
       fetchPlayersForGroup(selectedGroup.id);
     }
   }, [selectedGroup]);
+
+  useEffect(() => {
+    filterAndSortPlayers();
+  }, [players, searchQuery, sortBy, playerStats]);
 
   const fetchGroups = async () => {
     try {
@@ -66,6 +73,35 @@ const Players = () => {
     } catch (error) {
       toast.error('Помилка завантаження гравців');
     }
+  };
+
+  const filterAndSortPlayers = () => {
+    let filtered = [...players];
+    
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.full_name.localeCompare(b.full_name, 'uk');
+        case 'jersey':
+          return (a.jersey_number || 999) - (b.jersey_number || 999);
+        case 'attendance':
+          const rateA = playerStats[a.id]?.attendance_rate || 0;
+          const rateB = playerStats[b.id]?.attendance_rate || 0;
+          return rateB - rateA;
+        default:
+          return 0;
+      }
+    });
+    
+    setFilteredPlayers(filtered);
   };
 
   const handleSubmit = async (e) => {
@@ -127,16 +163,17 @@ const Players = () => {
     setCurrentPlayer(null);
   };
 
-  const getAttendanceColor = (rate) => {
-    if (rate >= 80) return 'text-emerald-600';
-    if (rate >= 60) return 'text-orange-600';
-    return 'text-destructive';
-  };
-
   const handleBackToGroups = () => {
     setSelectedGroup(null);
     setPlayers([]);
+    setFilteredPlayers([]);
     setPlayerStats({});
+    setSearchQuery('');
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Немає даних';
+    return new Date(dateStr).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   if (loading) {
@@ -148,9 +185,7 @@ const Players = () => {
     return (
       <div className="max-w-7xl mx-auto" data-testid="players-page">
         <div className="mb-8">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight">
-            Гравці
-          </h1>
+          <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight">Гравці</h1>
           <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wider">
             Оберіть групу щоб побачити гравців
           </p>
@@ -193,7 +228,7 @@ const Players = () => {
   // Show players for selected group
   return (
     <div className="max-w-7xl mx-auto" data-testid="players-list-page">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Button
             onClick={handleBackToGroups}
@@ -201,15 +236,14 @@ const Players = () => {
             variant="outline"
             className="rounded-sm"
           >
-            <ArrowLeft size={20} className="mr-2" />
-            Назад
+            <ArrowLeft size={20} className="mr-2" />Назад
           </Button>
           <div>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight">
+            <h1 className="font-heading text-3xl md:text-4xl font-bold uppercase tracking-tight">
               {selectedGroup.name}
             </h1>
-            <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wider">
-              {players.length} {players.length === 1 ? 'гравець' : 'гравців'}
+            <p className="text-sm text-muted-foreground mt-1">
+              {filteredPlayers.length} {filteredPlayers.length === 1 ? 'гравець' : 'гравців'}
             </p>
           </div>
         </div>
@@ -222,8 +256,7 @@ const Players = () => {
               data-testid="add-player-button"
               className="bg-primary text-white hover:bg-orange-600 rounded-sm font-bold uppercase tracking-wide"
             >
-              <Plus size={20} weight="bold" className="mr-2" />
-              Додати
+              <Plus size={20} weight="bold" className="mr-2" />Додати
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-white max-w-md">
@@ -299,11 +332,56 @@ const Players = () => {
         </Dialog>
       </div>
 
+      {/* Search and Sort */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <MagnifyingGlass size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            data-testid="search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Пошук по імені..."
+            className="rounded-sm pl-10"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setSortBy('name')}
+            data-testid="sort-name"
+            variant={sortBy === 'name' ? 'default' : 'outline'}
+            className="rounded-sm"
+          >
+            <SortAscending size={16} className="mr-1" />Ім'я
+          </Button>
+          <Button
+            onClick={() => setSortBy('jersey')}
+            data-testid="sort-jersey"
+            variant={sortBy === 'jersey' ? 'default' : 'outline'}
+            className="rounded-sm"
+          >
+            №
+          </Button>
+          <Button
+            onClick={() => setSortBy('attendance')}
+            data-testid="sort-attendance"
+            variant={sortBy === 'attendance' ? 'default' : 'outline'}
+            className="rounded-sm"
+          >
+            %
+          </Button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {players.map((player) => {
+        {filteredPlayers.map((player) => {
           const stats = playerStats[player.id];
           return (
-            <Card key={player.id} data-testid={`player-card-${player.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
+            <Card key={player.id} data-testid={`player-card-${player.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5 relative">
+              {stats?.has_debt && stats.debt_amount > 0 && (
+                <div className="absolute top-2 right-2 bg-destructive/10 p-1 rounded-sm" title={`Борг: ${stats.debt_amount}₴`}>
+                  <Warning size={20} weight="fill" className="text-destructive" />
+                </div>
+              )}
               <div className="flex items-start gap-4">
                 <div className="bg-accent p-3 rounded-sm">
                   <UserCircle size={32} weight="duotone" className="text-primary" />
@@ -318,21 +396,28 @@ const Players = () => {
               </div>
               
               {stats && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <div className="p-3 bg-emerald-50 rounded-sm">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Відвідуваність</p>
-                    <p className={`font-heading text-2xl font-bold ${
-                      stats.attendance_rate >= 80 ? 'text-emerald-600' :
-                      stats.attendance_rate >= 60 ? 'text-orange-600' : 'text-destructive'
-                    }`}>{stats.attendance_rate}%</p>
-                    <p className="text-xs text-muted-foreground">{stats.present_count}/{stats.total_sessions}</p>
+                <>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="p-3 bg-emerald-50 rounded-sm">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Відвідуваність</p>
+                      <p className={`font-heading text-2xl font-bold ${
+                        stats.attendance_rate >= 80 ? 'text-emerald-600' :
+                        stats.attendance_rate >= 60 ? 'text-orange-600' : 'text-destructive'
+                      }`}>{stats.attendance_rate}%</p>
+                      <p className="text-xs text-muted-foreground">{stats.present_count}/{stats.total_sessions}</p>
+                    </div>
+                    <div className="p-3 bg-orange-50 rounded-sm">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Оплачено</p>
+                      <p className="font-heading text-lg font-bold text-primary">{stats.total_paid}₴</p>
+                      <p className="text-xs text-muted-foreground">{stats.payment_count} платежів</p>
+                    </div>
                   </div>
-                  <div className="p-3 bg-orange-50 rounded-sm">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Оплачено</p>
-                    <p className="font-heading text-lg font-bold text-primary">{stats.total_paid}₴</p>
-                    <p className="text-xs text-muted-foreground">{stats.payment_count} платежів</p>
-                  </div>
-                </div>
+                  {stats.last_attendance && (
+                    <div className="mt-3 p-2 bg-zinc-50 rounded-sm">
+                      <p className="text-xs text-muted-foreground">Останнє тренування: <span className="font-medium text-foreground">{formatDate(stats.last_attendance)}</span></p>
+                    </div>
+                  )}
+                </>
               )}
               
               {player.notes && (
@@ -348,8 +433,7 @@ const Players = () => {
                   size="sm"
                   className="flex-1 rounded-sm border-2 border-primary text-primary hover:bg-primary/10"
                 >
-                  <Pencil size={16} className="mr-1" />
-                  Редагувати
+                  <Pencil size={16} className="mr-1" />Редагувати
                 </Button>
                 <Button
                   onClick={() => handleDelete(player.id)}
@@ -365,6 +449,12 @@ const Players = () => {
           );
         })}
       </div>
+
+      {filteredPlayers.length === 0 && players.length > 0 && (
+        <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
+          <p className="text-muted-foreground">Гравців з таким ім'ям не знайдено</p>
+        </Card>
+      )}
 
       {players.length === 0 && (
         <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
