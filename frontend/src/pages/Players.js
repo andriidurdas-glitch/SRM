@@ -318,6 +318,31 @@ const Players = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Статус</Label>
+                <select
+                  data-testid="player-status-select"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full bg-white border border-zinc-200 rounded-sm h-10 px-3"
+                >
+                  <option value="active">Активний</option>
+                  <option value="injured">Травмований</option>
+                  <option value="inactive">Вибув</option>
+                </select>
+              </div>
+              {formData.status === 'injured' && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Обмеження/деталі травми</Label>
+                  <textarea
+                    data-testid="player-injury-notes-input"
+                    value={formData.injury_notes}
+                    onChange={(e) => setFormData({ ...formData, injury_notes: e.target.value })}
+                    className="w-full bg-white border border-zinc-200 rounded-sm p-3 min-h-[60px]"
+                    placeholder="Розтяг м'язів, обмеження навантажень..."
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Нотатки</Label>
                 <textarea
                   data-testid="player-notes-input"
