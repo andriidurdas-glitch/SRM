@@ -187,52 +187,139 @@ const Groups = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {groups.map((group) => (
-          <Card key={group.id} data-testid={`group-card-${group.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
-            <div className="flex items-start gap-4">
-              <div className="bg-zinc-100 p-3 rounded-sm">
-                <UsersThree size={32} weight="duotone" className="text-zinc-700" />
+        {groups.map((group) => {
+          const stats = groupStats[group.id];
+          return (
+            <Card key={group.id} data-testid={`group-card-${group.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
+              <div className="flex items-start gap-4">
+                <div className="bg-zinc-100 p-3 rounded-sm">
+                  <UsersThree size={32} weight="duotone" className="text-zinc-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-heading text-xl font-bold truncate">{group.name}</h3>
+                  <p className="text-sm text-muted-foreground">Гравців: {group.player_count}</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-heading text-xl font-bold truncate">{group.name}</h3>
-                <p className="text-sm text-muted-foreground">Гравців: {group.player_count}</p>
+              
+              {stats && (
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-emerald-50 rounded-sm">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Відвідуваність</p>
+                    <p className="font-heading text-2xl font-bold text-emerald-600">{stats.attendance_rate}%</p>
+                    <p className="text-xs text-muted-foreground">{stats.present_count}/{stats.total_attendance_records}</p>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-sm">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Дохід</p>
+                    <p className="font-heading text-lg font-bold text-primary">{stats.total_revenue}₴</p>
+                    <p className="text-xs text-muted-foreground">{stats.total_sessions} сесій</p>
+                  </div>
+                </div>
+              )}
+              
+              {group.schedule && (
+                <div className="mt-4 p-3 bg-accent rounded-sm">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Розклад</p>
+                  <p className="text-sm text-foreground">{group.schedule}</p>
+                </div>
+              )}
+              {group.description && (
+                <div className="mt-3 p-3 bg-muted rounded-sm">
+                  <p className="text-xs text-muted-foreground">{group.description}</p>
+                </div>
+              )}
+              <div className="flex gap-2 mt-4">
+                {stats && stats.player_stats && stats.player_stats.length > 0 && (
+                  <Button
+                    onClick={() => viewGroupStats(group.id)}
+                    data-testid={`view-stats-${group.id}`}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 rounded-sm border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                  >
+                    <ChartBar size={16} className="mr-1" />
+                    Статистика
+                  </Button>
+                )}
+                <Button
+                  onClick={() => handleEdit(group)}
+                  data-testid={`edit-group-${group.id}`}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-sm border-2 border-primary text-primary hover:bg-primary/10"
+                >
+                  <Pencil size={16} className="mr-1" />
+                  Редагувати
+                </Button>
+                <Button
+                  onClick={() => handleDelete(group.id)}
+                  data-testid={`delete-group-${group.id}`}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-sm border-2 border-destructive text-destructive hover:bg-destructive/10"
+                >
+                  <Trash size={16} />
+                </Button>
               </div>
-            </div>
-            {group.schedule && (
-              <div className="mt-4 p-3 bg-accent rounded-sm">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Розклад</p>
-                <p className="text-sm text-foreground">{group.schedule}</p>
-              </div>
-            )}
-            {group.description && (
-              <div className="mt-3 p-3 bg-muted rounded-sm">
-                <p className="text-xs text-muted-foreground">{group.description}</p>
-              </div>
-            )}
-            <div className="flex gap-2 mt-4">
-              <Button
-                onClick={() => handleEdit(group)}
-                data-testid={`edit-group-${group.id}`}
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-sm border-2 border-primary text-primary hover:bg-primary/10"
-              >
-                <Pencil size={16} className="mr-1" />
-                Редагувати
-              </Button>
-              <Button
-                onClick={() => handleDelete(group.id)}
-                data-testid={`delete-group-${group.id}`}
-                variant="outline"
-                size="sm"
-                className="rounded-sm border-2 border-destructive text-destructive hover:bg-destructive/10"
-              >
-                <Trash size={16} />
-              </Button>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
+
+      {/* Group Statistics Dialog */}
+      <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
+        <DialogContent className="bg-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-2xl font-bold uppercase">
+              Детальна статистика групи
+            </DialogTitle>
+          </DialogHeader>
+          {selectedGroupStats && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-emerald-50 rounded-sm">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Відвідуваність</p>
+                  <p className="font-heading text-3xl font-bold text-emerald-600">{selectedGroupStats.attendance_rate}%</p>
+                </div>
+                <div className="p-4 bg-orange-50 rounded-sm">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Дохід</p>
+                  <p className="font-heading text-2xl font-bold text-primary">{selectedGroupStats.total_revenue}₴</p>
+                </div>
+                <div className="p-4 bg-zinc-100 rounded-sm">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Тренувань</p>
+                  <p className="font-heading text-2xl font-bold">{selectedGroupStats.total_sessions}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-heading text-lg font-semibold uppercase mb-3">Статистика по гравцях</h4>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {selectedGroupStats.player_stats.map((pStat, idx) => (
+                    <div key={pStat.player_id} className="flex items-center justify-between p-3 bg-muted rounded-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-muted-foreground">#{idx + 1}</span>
+                        <div>
+                          <p className="font-medium">{pStat.player_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {pStat.present_count}/{pStat.total_sessions} тренувань
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-heading text-xl font-bold ${
+                          pStat.attendance_rate >= 80 ? 'text-emerald-600' :
+                          pStat.attendance_rate >= 60 ? 'text-orange-600' : 'text-destructive'
+                        }`}>
+                          {pStat.attendance_rate}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {groups.length === 0 && (
         <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
