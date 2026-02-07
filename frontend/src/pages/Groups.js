@@ -100,6 +100,14 @@ const Groups = () => {
     setCurrentGroup(null);
   };
 
+  const viewGroupStats = (groupId) => {
+    const stats = groupStats[groupId];
+    if (stats) {
+      setSelectedGroupStats(stats);
+      setStatsDialogOpen(true);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8">Завантаження...</div>;
   }
