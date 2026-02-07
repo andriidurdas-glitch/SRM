@@ -245,7 +245,7 @@ const Finance = () => {
 
       {payments.length === 0 && (
         <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
-          <CurrencyCircle size={64} className="mx-auto text-muted-foreground mb-4" weight="duotone" />
+          <CurrencyDollar size={64} className="mx-auto text-muted-foreground mb-4" weight="duotone" />
           <p className="text-muted-foreground">Платежів за цей місяць не знайдено</p>
         </Card>
       )}
