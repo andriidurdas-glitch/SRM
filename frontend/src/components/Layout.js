@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, UsersThree, ClipboardText, Wallet, Calendar, ChartBar, SignOut, List, X } from '@phosphor-icons/react';
+import { Users, UsersThree, ClipboardText, Wallet, Calendar, ChartBar, SignOut, List, X, UserPlus } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 
 const Layout = ({ children, onLogout }) => {
