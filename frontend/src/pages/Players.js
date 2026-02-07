@@ -29,6 +29,8 @@ const Players = () => {
     group_id: '',
     notes: '',
     jersey_number: '',
+    status: 'active',
+    injury_notes: '',
   });
 
   useEffect(() => {
