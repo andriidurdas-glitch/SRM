@@ -54,7 +54,7 @@ const Dashboard = () => {
     {
       title: 'Дохід цього місяця',
       value: `${stats.month_revenue.toFixed(0)} ₴`,
-      icon: CurrencyCircle,
+      icon: CurrencyDollar,
       color: 'text-primary',
       bgColor: 'bg-orange-50',
     },
