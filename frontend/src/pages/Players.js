@@ -13,6 +13,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const Players = () => {
   const [players, setPlayers] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [playerStats, setPlayerStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
