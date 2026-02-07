@@ -120,6 +120,12 @@ const Players = () => {
     return group ? group.name : 'Без групи';
   };
 
+  const getAttendanceColor = (rate) => {
+    if (rate >= 80) return 'text-emerald-600';
+    if (rate >= 60) return 'text-orange-600';
+    return 'text-destructive';
+  };
+
   if (loading) {
     return <div className="text-center py-8">Завантаження...</div>;
   }
