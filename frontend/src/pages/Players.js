@@ -35,6 +35,16 @@ const Players = () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/players`);
       setPlayers(response.data);
+      
+      // Fetch stats for each player
+      const statsPromises = response.data.map(player =>
+        axios.get(`${BACKEND_URL}/api/statistics/player/${player.id}`)
+          .then(res => ({ [player.id]: res.data }))
+          .catch(() => ({ [player.id]: null }))
+      );
+      const statsResults = await Promise.all(statsPromises);
+      const statsMap = Object.assign({}, ...statsResults);
+      setPlayerStats(statsMap);
     } catch (error) {
       toast.error('Помилка завантаження гравців');
     } finally {
