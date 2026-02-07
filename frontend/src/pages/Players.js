@@ -296,7 +296,9 @@ const Players = () => {
                   <UserCircle size={32} weight="duotone" className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-heading text-xl font-bold truncate">{player.full_name}</h3>
+                  <h3 className="font-heading text-xl font-bold truncate">
+                    {player.full_name}{player.jersey_number ? ` — №${player.jersey_number}` : ''}
+                  </h3>
                   <p className="text-sm text-muted-foreground">Рік: {player.birth_year}</p>
                   <p className="text-sm text-muted-foreground truncate">{player.parent_contact}</p>
                 </div>
