@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CurrencyCircle, Download } from '@phosphor-icons/react';
+import { Plus, CurrencyDollar, Download } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
