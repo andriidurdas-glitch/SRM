@@ -9,6 +9,7 @@ const Layout = ({ children, onLogout }) => {
 
   const navigation = [
     { name: 'Головна', path: '/', icon: ChartBar },
+    { name: 'Пробні', path: '/leads', icon: UserPlus },
     { name: 'Гравці', path: '/players', icon: Users },
     { name: 'Групи', path: '/groups', icon: UsersThree },
     { name: 'Відвідуваність', path: '/attendance', icon: ClipboardText },
