@@ -70,7 +70,7 @@ const Layout = ({ children, onLogout }) => {
           size="icon"
           data-testid="mobile-menu-button"
         >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          {sidebarOpen ? <X size={24} /> : <List size={24} />}
         </Button>
       </header>
 
