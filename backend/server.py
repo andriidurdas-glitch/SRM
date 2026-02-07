@@ -344,6 +344,98 @@ async def delete_attendance(attendance_id: str):
         raise HTTPException(status_code=404, detail="Відвідуваність не знайдено")
     return {"message": "Відвідуваність видалено"}
 
+# LEADS (Пробні тренування)
+@api_router.post("/leads", response_model=Lead)
+async def create_lead(lead: LeadCreate):
+    doc = lead.model_dump()
+    doc['id'] = str(ObjectId())
+    doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    if 'status' not in doc:
+        doc['status'] = 'scheduled'
+    await db.leads.insert_one(doc)
+    return Lead(**doc)
+
+@api_router.get("/leads", response_model=List[Lead])
+async def get_leads(status: Optional[str] = None):
+    query = {}
+    if status:
+        query['status'] = status
+    leads = await db.leads.find(query, {"_id": 0}).to_list(1000)
+    return leads
+
+@api_router.get("/leads/{lead_id}", response_model=Lead)
+async def get_lead(lead_id: str):
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Заявку не знайдено")
+    return lead
+
+@api_router.put("/leads/{lead_id}", response_model=Lead)
+async def update_lead(lead_id: str, lead: LeadCreate):
+    doc = lead.model_dump()
+    result = await db.leads.update_one({"id": lead_id}, {"$set": doc})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Заявку не знайдено")
+    updated = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    return Lead(**updated)
+
+@api_router.delete("/leads/{lead_id}")
+async def delete_lead(lead_id: str):
+    result = await db.leads.delete_one({"id": lead_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Заявку не знайдено")
+    return {"message": "Заявку видалено"}
+
+@api_router.post("/leads/{lead_id}/convert")
+async def convert_lead_to_player(lead_id: str, group_id: str, birth_year: int):
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Заявку не знайдено")
+    
+    # Create player from lead
+    player_doc = {
+        "id": str(ObjectId()),
+        "full_name": lead['child_name'],
+        "birth_year": birth_year,
+        "parent_contact": lead['parent_contact'],
+        "group_id": group_id,
+        "notes": f"Конвертовано з пробного тренування. {lead.get('notes', '')}",
+        "jersey_number": None,
+        "status": "active",
+        "injury_notes": "",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.players.insert_one(player_doc)
+    
+    # Update lead status
+    await db.leads.update_one({"id": lead_id}, {"$set": {"status": "converted"}})
+    
+    return {
+        "message": "Гравця успішно додано",
+        "player_id": player_doc['id']
+    }
+
+@api_router.get("/leads/statistics/overview")
+async def get_leads_statistics():
+    all_leads = await db.leads.find({}, {"_id": 0}).to_list(1000)
+    total = len(all_leads)
+    
+    status_counts = {
+        "scheduled": len([l for l in all_leads if l['status'] == 'scheduled']),
+        "attended": len([l for l in all_leads if l['status'] == 'attended']),
+        "thinking": len([l for l in all_leads if l['status'] == 'thinking']),
+        "converted": len([l for l in all_leads if l['status'] == 'converted']),
+        "no_show": len([l for l in all_leads if l['status'] == 'no_show'])
+    }
+    
+    conversion_rate = (status_counts['converted'] / total * 100) if total > 0 else 0
+    
+    return {
+        "total_leads": total,
+        "status_counts": status_counts,
+        "conversion_rate": round(conversion_rate, 1)
+    }
+
 @api_router.get("/attendance", response_model=List[Attendance])
 async def get_attendance(date: Optional[str] = None, group_id: Optional[str] = None, player_id: Optional[str] = None):
     query = {}
