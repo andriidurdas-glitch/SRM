@@ -271,6 +271,68 @@ async def get_dashboard_stats():
         "month_revenue": total_revenue
     }
 
+@api_router.get("/statistics/player/{player_id}")
+async def get_player_stats(player_id: str):
+    all_attendance = await db.attendance.find({"player_id": player_id}, {"_id": 0}).to_list(1000)
+    total_sessions = len(all_attendance)
+    present_count = sum(1 for a in all_attendance if a['status'] == 'present')
+    absent_count = sum(1 for a in all_attendance if a['status'] == 'absent')
+    attendance_rate = (present_count / total_sessions * 100) if total_sessions > 0 else 0
+    
+    payments = await db.payments.find({"player_id": player_id}, {"_id": 0}).to_list(1000)
+    total_paid = sum(p['amount'] for p in payments)
+    
+    return {
+        "player_id": player_id,
+        "total_sessions": total_sessions,
+        "present_count": present_count,
+        "absent_count": absent_count,
+        "attendance_rate": round(attendance_rate, 1),
+        "total_paid": total_paid,
+        "payment_count": len(payments)
+    }
+
+@api_router.get("/statistics/group/{group_id}")
+async def get_group_stats(group_id: str):
+    players = await db.players.find({"group_id": group_id}, {"_id": 0}).to_list(1000)
+    player_ids = [p['id'] for p in players]
+    
+    all_attendance = await db.attendance.find({"group_id": group_id}, {"_id": 0}).to_list(1000)
+    total_sessions = len(set(a['date'] for a in all_attendance))
+    present_count = sum(1 for a in all_attendance if a['status'] == 'present')
+    absent_count = sum(1 for a in all_attendance if a['status'] == 'absent')
+    total_records = len(all_attendance)
+    attendance_rate = (present_count / total_records * 100) if total_records > 0 else 0
+    
+    payments = await db.payments.find({"player_id": {"$in": player_ids}}, {"_id": 0}).to_list(1000)
+    total_revenue = sum(p['amount'] for p in payments)
+    
+    player_stats = []
+    for player in players:
+        player_attendance = [a for a in all_attendance if a['player_id'] == player['id']]
+        p_present = sum(1 for a in player_attendance if a['status'] == 'present')
+        p_total = len(player_attendance)
+        p_rate = (p_present / p_total * 100) if p_total > 0 else 0
+        player_stats.append({
+            "player_id": player['id'],
+            "player_name": player['full_name'],
+            "attendance_rate": round(p_rate, 1),
+            "present_count": p_present,
+            "total_sessions": p_total
+        })
+    
+    return {
+        "group_id": group_id,
+        "player_count": len(players),
+        "total_sessions": total_sessions,
+        "total_attendance_records": total_records,
+        "present_count": present_count,
+        "absent_count": absent_count,
+        "attendance_rate": round(attendance_rate, 1),
+        "total_revenue": total_revenue,
+        "player_stats": sorted(player_stats, key=lambda x: x['attendance_rate'], reverse=True)
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
