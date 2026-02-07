@@ -10,8 +10,8 @@ const Layout = ({ children, onLogout }) => {
   const navigation = [
     { name: 'Головна', path: '/', icon: ChartBar },
     { name: 'Гравці', path: '/players', icon: Users },
-    { name: 'Групи', path: '/groups', icon: UsersRound },
-    { name: 'Відвідуваність', path: '/attendance', icon: ClipboardCheck },
+    { name: 'Групи', path: '/groups', icon: UsersThree },
+    { name: 'Відвідуваність', path: '/attendance', icon: ClipboardText },
     { name: 'Фінанси', path: '/finance', icon: Wallet },
     { name: 'Розклад', path: '/schedule', icon: Calendar },
     { name: 'Статистика', path: '/statistics', icon: ChartBar },
