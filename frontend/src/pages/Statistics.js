@@ -116,7 +116,7 @@ const Statistics = () => {
               <p className="font-heading text-2xl font-bold">{stats.month_revenue.toFixed(0)} ₴</p>
             </div>
             <div className="bg-orange-50 p-3 rounded-sm">
-              <CurrencyCircle size={28} weight="duotone" className="text-primary" />
+              <CurrencyDollar size={28} weight="duotone" className="text-primary" />
             </div>
           </div>
         </Card>
