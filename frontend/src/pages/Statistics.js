@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChartBar, Users, TrendUp, CurrencyCircle } from '@phosphor-icons/react';
+import { ChartBar, Users, TrendUp, CurrencyDollar } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import axios from 'axios';
