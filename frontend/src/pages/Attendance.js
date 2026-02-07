@@ -13,6 +13,7 @@ const Attendance = () => {
   const [selectedGroup, setSelectedGroup] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [attendance, setAttendance] = useState([]);
+  const [trainingDays, setTrainingDays] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
