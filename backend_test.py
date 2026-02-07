@@ -394,6 +394,8 @@ def main():
         payments_success = tester.test_payments()
         sessions_success = tester.test_sessions()
         stats_success = tester.test_dashboard_stats()
+        player_stats_success = tester.test_player_statistics()
+        group_stats_success = tester.test_group_statistics()
 
         # Print results
         print(f"\n📊 Test Results:")
