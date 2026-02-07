@@ -318,6 +318,89 @@ async def get_dashboard_stats():
         "month_revenue": total_revenue
     }
 
+@api_router.get("/finance/dashboard")
+async def get_finance_dashboard(month: Optional[str] = None):
+    if not month:
+        month = date.today().strftime("%Y-%m")
+    
+    # Get all payments for the month
+    payments = await db.payments.find({"month": month}, {"_id": 0}).to_list(1000)
+    total_revenue = sum(p['amount'] for p in payments)
+    payment_count = len(payments)
+    avg_payment = total_revenue / payment_count if payment_count > 0 else 0
+    
+    # Calculate revenue by group
+    players = await db.players.find({}, {"_id": 0}).to_list(1000)
+    groups = await db.groups.find({}, {"_id": 0}).to_list(1000)
+    
+    group_revenue = {}
+    for group in groups:
+        group_players = [p['id'] for p in players if p.get('group_id') == group['id']]
+        group_payments = [p for p in payments if p['player_id'] in group_players]
+        group_revenue[group['id']] = {
+            "group_name": group['name'],
+            "revenue": sum(p['amount'] for p in group_payments),
+            "payment_count": len(group_payments),
+            "player_count": len(group_players)
+        }
+    
+    # Get debtors (players who haven't paid this month)
+    all_players = await db.players.find({}, {"_id": 0}).to_list(1000)
+    paid_player_ids = set(p['player_id'] for p in payments)
+    debtors = []
+    
+    for player in all_players:
+        if player['id'] not in paid_player_ids and player.get('group_id'):
+            group = next((g for g in groups if g['id'] == player.get('group_id')), None)
+            debt_amount = group.get('monthly_fee', 0) if group else 0
+            if debt_amount > 0:
+                debtors.append({
+                    "player_id": player['id'],
+                    "player_name": player['full_name'],
+                    "group_name": group['name'] if group else "Без групи",
+                    "debt_amount": debt_amount,
+                    "parent_contact": player.get('parent_contact', '')
+                })
+    
+    return {
+        "month": month,
+        "total_revenue": total_revenue,
+        "payment_count": payment_count,
+        "average_payment": round(avg_payment, 2),
+        "group_revenue": group_revenue,
+        "debtors": debtors,
+        "debtor_count": len(debtors),
+        "total_debt": sum(d['debt_amount'] for d in debtors)
+    }
+
+@api_router.get("/finance/debtors")
+async def get_debtors(month: Optional[str] = None):
+    if not month:
+        month = date.today().strftime("%Y-%m")
+    
+    payments = await db.payments.find({"month": month}, {"_id": 0}).to_list(1000)
+    paid_player_ids = set(p['player_id'] for p in payments)
+    
+    all_players = await db.players.find({}, {"_id": 0}).to_list(1000)
+    groups = await db.groups.find({}, {"_id": 0}).to_list(1000)
+    
+    debtors = []
+    for player in all_players:
+        if player['id'] not in paid_player_ids and player.get('group_id'):
+            group = next((g for g in groups if g['id'] == player.get('group_id')), None)
+            debt_amount = group.get('monthly_fee', 0) if group else 0
+            if debt_amount > 0:
+                debtors.append({
+                    "player_id": player['id'],
+                    "player_name": player['full_name'],
+                    "group_name": group['name'] if group else "Без групи",
+                    "debt_amount": debt_amount,
+                    "parent_contact": player.get('parent_contact', ''),
+                    "group_id": player.get('group_id', '')
+                })
+    
+    return debtors
+
 @api_router.get("/statistics/player/{player_id}")
 async def get_player_stats(player_id: str):
     all_attendance = await db.attendance.find({"player_id": player_id}, {"_id": 0}).to_list(1000)
