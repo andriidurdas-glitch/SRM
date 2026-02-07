@@ -25,6 +25,7 @@ const Players = () => {
     parent_contact: '',
     group_id: '',
     notes: '',
+    jersey_number: '',
   });
 
   useEffect(() => {
