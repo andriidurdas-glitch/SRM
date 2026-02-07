@@ -225,49 +225,68 @@ const Players = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {players.map((player) => (
-          <Card key={player.id} data-testid={`player-card-${player.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
-            <div className="flex items-start gap-4">
-              <div className="bg-accent p-3 rounded-sm">
-                <UserCircle size={32} weight="duotone" className="text-primary" />
+        {players.map((player) => {
+          const stats = playerStats[player.id];
+          return (
+            <Card key={player.id} data-testid={`player-card-${player.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
+              <div className="flex items-start gap-4">
+                <div className="bg-accent p-3 rounded-sm">
+                  <UserCircle size={32} weight="duotone" className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-heading text-xl font-bold truncate">{player.full_name}</h3>
+                  <p className="text-sm text-muted-foreground">Рік: {player.birth_year}</p>
+                  <p className="text-sm text-muted-foreground truncate">{player.parent_contact}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-primary mt-2">
+                    {getGroupName(player.group_id)}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-heading text-xl font-bold truncate">{player.full_name}</h3>
-                <p className="text-sm text-muted-foreground">Рік: {player.birth_year}</p>
-                <p className="text-sm text-muted-foreground truncate">{player.parent_contact}</p>
-                <p className="text-xs font-bold uppercase tracking-wider text-primary mt-2">
-                  {getGroupName(player.group_id)}
-                </p>
+              
+              {stats && (
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-emerald-50 rounded-sm">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Відвідуваність</p>
+                    <p className="font-heading text-2xl font-bold text-emerald-600">{stats.attendance_rate}%</p>
+                    <p className="text-xs text-muted-foreground">{stats.present_count}/{stats.total_sessions}</p>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-sm">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Оплачено</p>
+                    <p className="font-heading text-lg font-bold text-primary">{stats.total_paid}₴</p>
+                    <p className="text-xs text-muted-foreground">{stats.payment_count} платежів</p>
+                  </div>
+                </div>
+              )}
+              
+              {player.notes && (
+                <div className="mt-4 p-3 bg-muted rounded-sm">
+                  <p className="text-xs text-muted-foreground">{player.notes}</p>
+                </div>
+              )}
+              <div className="flex gap-2 mt-4">
+                <Button
+                  onClick={() => handleEdit(player)}
+                  data-testid={`edit-player-${player.id}`}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-sm border-2 border-primary text-primary hover:bg-primary/10"
+                >
+                  <Pencil size={16} className="mr-1" />
+                  Редагувати
+                </Button>
+                <Button
+                  onClick={() => handleDelete(player.id)}
+                  data-testid={`delete-player-${player.id}`}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-sm border-2 border-destructive text-destructive hover:bg-destructive/10"
+                >
+                  <Trash size={16} />
+                </Button>
               </div>
-            </div>
-            {player.notes && (
-              <div className="mt-4 p-3 bg-muted rounded-sm">
-                <p className="text-xs text-muted-foreground">{player.notes}</p>
-              </div>
-            )}
-            <div className="flex gap-2 mt-4">
-              <Button
-                onClick={() => handleEdit(player)}
-                data-testid={`edit-player-${player.id}`}
-                variant="outline"
-                size="sm"
-                className="flex-1 rounded-sm border-2 border-primary text-primary hover:bg-primary/10"
-              >
-                <Pencil size={16} className="mr-1" />
-                Редагувати
-              </Button>
-              <Button
-                onClick={() => handleDelete(player.id)}
-                data-testid={`delete-player-${player.id}`}
-                variant="outline"
-                size="sm"
-                className="rounded-sm border-2 border-destructive text-destructive hover:bg-destructive/10"
-              >
-                <Trash size={16} />
-              </Button>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
       {players.length === 0 && (
