@@ -256,12 +256,65 @@ async def update_attendance(attendance_id: str, status: str, notes: Optional[str
     updated = await db.attendance.find_one({"id": attendance_id}, {"_id": 0})
     return Attendance(**updated)
 
-@api_router.delete("/attendance/{attendance_id}")
-async def delete_attendance(attendance_id: str):
-    result = await db.attendance.delete_one({"id": attendance_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Відвідуваність не знайдено")
-    return {"message": "Відвідуваність видалено"}
+@api_router.post("/attendance/bulk")
+async def create_bulk_attendance(group_id: str, date: str, player_ids: List[str], status: str = "present"):
+    # Validate that the date is a training day
+    group = await db.groups.find_one({"id": group_id}, {"_id": 0})
+    if group and group.get('training_days'):
+        attendance_date = datetime.fromisoformat(date)
+        weekday = attendance_date.weekday()
+        if weekday not in group['training_days']:
+            raise HTTPException(status_code=400, detail=f"Немає тренування в цей день. Тренування: {group.get('schedule', '')}")
+    
+    created_count = 0
+    updated_count = 0
+    
+    for player_id in player_ids:
+        # Check if attendance already exists
+        existing = await db.attendance.find_one({
+            "player_id": player_id,
+            "date": date
+        }, {"_id": 0})
+        
+        if existing:
+            # Update existing
+            await db.attendance.update_one(
+                {"id": existing['id']},
+                {"$set": {"status": status}}
+            )
+            updated_count += 1
+        else:
+            # Create new
+            doc = {
+                "id": str(ObjectId()),
+                "player_id": player_id,
+                "group_id": group_id,
+                "date": date,
+                "status": status,
+                "notes": "",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.attendance.insert_one(doc)
+            created_count += 1
+    
+    return {
+        "message": f"Відвідуваність відмічено",
+        "created": created_count,
+        "updated": updated_count,
+        "total": len(player_ids)
+    }
+
+@api_router.get("/attendance/training-days/{group_id}")
+async def get_training_days(group_id: str):
+    group = await db.groups.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Групу не знайдено")
+    
+    return {
+        "group_id": group_id,
+        "training_days": group.get('training_days', []),
+        "schedule": group.get('schedule', '')
+    }
 
 @api_router.get("/attendance", response_model=List[Attendance])
 async def get_attendance(date: Optional[str] = None, group_id: Optional[str] = None, player_id: Optional[str] = None):
