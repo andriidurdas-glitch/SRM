@@ -220,7 +220,7 @@ const Finance = () => {
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
                 <div className="bg-orange-50 p-3 rounded-sm">
-                  <CurrencyCircle size={24} className="text-primary" weight="duotone" />
+                  <CurrencyDollar size={24} className="text-primary" weight="duotone" />
                 </div>
                 <div>
                   <h3 className="font-heading text-lg font-bold">{getPlayerName(payment.player_id)}</h3>
