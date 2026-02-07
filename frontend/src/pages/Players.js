@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash, UserCircle } from '@phosphor-icons/react';
+import { Plus, Pencil, Trash, UserCircle, ArrowLeft, UsersThree } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,8 +11,9 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Players = () => {
-  const [players, setPlayers] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [playerStats, setPlayerStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -27,17 +28,33 @@ const Players = () => {
   });
 
   useEffect(() => {
-    fetchPlayers();
     fetchGroups();
   }, []);
 
-  const fetchPlayers = async () => {
+  useEffect(() => {
+    if (selectedGroup) {
+      fetchPlayersForGroup(selectedGroup.id);
+    }
+  }, [selectedGroup]);
+
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/groups`);
+      setGroups(response.data);
+    } catch (error) {
+      toast.error('Помилка завантаження груп');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPlayersForGroup = async (groupId) => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/players`);
-      setPlayers(response.data);
+      const groupPlayers = response.data.filter(p => p.group_id === groupId);
+      setPlayers(groupPlayers);
       
-      // Fetch stats for each player
-      const statsPromises = response.data.map(player =>
+      const statsPromises = groupPlayers.map(player =>
         axios.get(`${BACKEND_URL}/api/statistics/player/${player.id}`)
           .then(res => ({ [player.id]: res.data }))
           .catch(() => ({ [player.id]: null }))
@@ -47,33 +64,24 @@ const Players = () => {
       setPlayerStats(statsMap);
     } catch (error) {
       toast.error('Помилка завантаження гравців');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchGroups = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/groups`);
-      setGroups(response.data);
-    } catch (error) {
-      console.error('Error fetching groups:', error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const submitData = { ...formData, group_id: selectedGroup.id };
       if (editMode && currentPlayer) {
-        await axios.put(`${BACKEND_URL}/api/players/${currentPlayer.id}`, formData);
+        await axios.put(`${BACKEND_URL}/api/players/${currentPlayer.id}`, submitData);
         toast.success('Гравця оновлено');
       } else {
-        await axios.post(`${BACKEND_URL}/api/players`, formData);
+        await axios.post(`${BACKEND_URL}/api/players`, submitData);
         toast.success('Гравця додано');
       }
       setDialogOpen(false);
       resetForm();
-      fetchPlayers();
+      fetchPlayersForGroup(selectedGroup.id);
+      fetchGroups();
     } catch (error) {
       toast.error('Помилка збереження');
     }
@@ -97,7 +105,8 @@ const Players = () => {
     try {
       await axios.delete(`${BACKEND_URL}/api/players/${id}`);
       toast.success('Гравця видалено');
-      fetchPlayers();
+      fetchPlayersForGroup(selectedGroup.id);
+      fetchGroups();
     } catch (error) {
       toast.error('Помилка видалення');
     }
@@ -115,31 +124,91 @@ const Players = () => {
     setCurrentPlayer(null);
   };
 
-  const getGroupName = (groupId) => {
-    const group = groups.find((g) => g.id === groupId);
-    return group ? group.name : 'Без групи';
-  };
-
   const getAttendanceColor = (rate) => {
     if (rate >= 80) return 'text-emerald-600';
     if (rate >= 60) return 'text-orange-600';
     return 'text-destructive';
   };
 
+  const handleBackToGroups = () => {
+    setSelectedGroup(null);
+    setPlayers([]);
+    setPlayerStats({});
+  };
+
   if (loading) {
     return <div className="text-center py-8">Завантаження...</div>;
   }
 
-  return (
-    <div className="max-w-7xl mx-auto" data-testid="players-page">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+  // Show groups list
+  if (!selectedGroup) {
+    return (
+      <div className="max-w-7xl mx-auto" data-testid="players-page">
+        <div className="mb-8">
           <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight">
             Гравці
           </h1>
           <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wider">
-            Управління гравцями
+            Оберіть групу щоб побачити гравців
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {groups.map((group) => (
+            <Card
+              key={group.id}
+              data-testid={`group-selector-${group.id}`}
+              onClick={() => setSelectedGroup(group)}
+              className="bg-white border border-zinc-200 rounded-sm shadow-sm p-6 cursor-pointer hover:border-primary transition-colors"
+            >
+              <div className="flex items-start gap-4">
+                <div className="bg-primary/10 p-3 rounded-sm">
+                  <UsersThree size={32} weight="duotone" className="text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-heading text-xl font-bold uppercase tracking-tight">{group.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Гравців: {group.player_count}</p>
+                  {group.schedule && (
+                    <p className="text-xs text-muted-foreground mt-2">{group.schedule}</p>
+                  )}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {groups.length === 0 && (
+          <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
+            <UsersThree size={64} className="mx-auto text-muted-foreground mb-4" weight="duotone" />
+            <p className="text-muted-foreground">Спочатку створіть групи в розділі "Групи"</p>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Show players for selected group
+  return (
+    <div className="max-w-7xl mx-auto" data-testid="players-list-page">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={handleBackToGroups}
+            data-testid="back-to-groups-button"
+            variant="outline"
+            className="rounded-sm"
+          >
+            <ArrowLeft size={20} className="mr-2" />
+            Назад
+          </Button>
+          <div>
+            <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight">
+              {selectedGroup.name}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wider">
+              {players.length} {players.length === 1 ? 'гравець' : 'гравців'}
+            </p>
+          </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
@@ -194,22 +263,6 @@ const Players = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Група</Label>
-                <select
-                  data-testid="player-group-select"
-                  value={formData.group_id}
-                  onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
-                  className="w-full bg-white border border-zinc-200 rounded-sm h-10 px-3"
-                >
-                  <option value="">Без групи</option>
-                  {groups.map((group) => (
-                    <option key={group.id} value={group.id}>
-                      {group.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Нотатки</Label>
                 <textarea
                   data-testid="player-notes-input"
@@ -243,9 +296,6 @@ const Players = () => {
                   <h3 className="font-heading text-xl font-bold truncate">{player.full_name}</h3>
                   <p className="text-sm text-muted-foreground">Рік: {player.birth_year}</p>
                   <p className="text-sm text-muted-foreground truncate">{player.parent_contact}</p>
-                  <p className="text-xs font-bold uppercase tracking-wider text-primary mt-2">
-                    {getGroupName(player.group_id)}
-                  </p>
                 </div>
               </div>
               
@@ -301,7 +351,7 @@ const Players = () => {
       {players.length === 0 && (
         <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
           <UserCircle size={64} className="mx-auto text-muted-foreground mb-4" weight="duotone" />
-          <p className="text-muted-foreground">Гравців ще немає. Додайте першого!</p>
+          <p className="text-muted-foreground">У цій групі ще немає гравців. Додайте першого!</p>
         </Card>
       )}
     </div>
