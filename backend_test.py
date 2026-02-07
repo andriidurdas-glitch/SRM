@@ -359,6 +359,191 @@ class FootballCRMTester:
         
         return success
 
+    def test_leads_crud(self):
+        """Test leads CRUD operations"""
+        # Create lead
+        success, response = self.run_test(
+            "Create Lead",
+            "POST",
+            "api/leads",
+            200,
+            data={
+                "child_name": "Тестовий Дитина",
+                "parent_contact": "+380501111111",
+                "trial_date": "2024-02-15",
+                "notes": "Пробне тренування",
+                "status": "scheduled"
+            }
+        )
+        if not success:
+            return False
+        
+        self.lead_id = response.get('id')
+        print(f"   Created lead ID: {self.lead_id}")
+
+        # Get all leads
+        success, _ = self.run_test(
+            "Get All Leads",
+            "GET",
+            "api/leads",
+            200
+        )
+
+        # Get specific lead
+        if self.lead_id:
+            success2, _ = self.run_test(
+                "Get Specific Lead",
+                "GET",
+                f"api/leads/{self.lead_id}",
+                200
+            )
+        
+            # Update lead
+            success3, _ = self.run_test(
+                "Update Lead",
+                "PUT",
+                f"api/leads/{self.lead_id}",
+                200,
+                data={
+                    "child_name": "Тестовий Дитина Оновлена",
+                    "parent_contact": "+380501111111",
+                    "trial_date": "2024-02-16",
+                    "notes": "Оновлені нотатки",
+                    "status": "attended"
+                }
+            )
+        else:
+            success2 = success3 = True
+
+        return success and success2 and success3
+
+    def test_lead_statistics(self):
+        """Test lead statistics endpoint"""
+        success, response = self.run_test(
+            "Get Lead Statistics",
+            "GET",
+            "api/leads/statistics/overview",
+            200
+        )
+        
+        if success and response:
+            required_fields = ['total_leads', 'status_counts', 'conversion_rate']
+            for field in required_fields:
+                if field not in response:
+                    print(f"❌ Missing field in lead stats: {field}")
+                    return False
+            print(f"   Lead Stats: Total={response.get('total_leads')}, Conversion={response.get('conversion_rate')}%")
+        
+        return success
+
+    def test_lead_conversion(self):
+        """Test lead to player conversion"""
+        if not self.lead_id or not self.group_id:
+            print("⚠️ Skipping lead conversion test - missing lead or group")
+            return True
+
+        success, response = self.run_test(
+            "Convert Lead to Player",
+            "POST",
+            f"api/leads/{self.lead_id}/convert",
+            200,
+            params={
+                "group_id": self.group_id,
+                "birth_year": 2012
+            }
+        )
+        
+        if success and response:
+            if 'player_id' not in response:
+                print(f"❌ Missing player_id in conversion response")
+                return False
+            print(f"   Converted lead to player ID: {response.get('player_id')}")
+        
+        return success
+
+    def test_player_with_features(self):
+        """Test player creation with jersey number, status, injury notes"""
+        success, response = self.run_test(
+            "Create Player with Jersey & Injury Info",
+            "POST",
+            "api/players",
+            200,
+            data={
+                "full_name": "Коваленко Артем",
+                "birth_year": 2011,
+                "parent_contact": "+380507777777",
+                "group_id": self.group_id if self.group_id else None,
+                "notes": "Тестовий гравець з травмою",
+                "jersey_number": 7,
+                "status": "injured",
+                "injury_notes": "Розтяг м'язів ноги, обмеження навантажень"
+            }
+        )
+        if not success:
+            return False
+        
+        self.injured_player_id = response.get('id')
+        print(f"   Created injured player ID: {self.injured_player_id}")
+        
+        # Test getting the player to verify fields
+        if self.injured_player_id:
+            success2, player_response = self.run_test(
+                "Get Player with Features",
+                "GET",
+                f"api/players/{self.injured_player_id}",
+                200
+            )
+            
+            if success2 and player_response:
+                # Verify jersey number and status
+                if player_response.get('jersey_number') != 7:
+                    print(f"❌ Expected jersey_number 7, got {player_response.get('jersey_number')}")
+                    return False
+                if player_response.get('status') != 'injured':
+                    print(f"❌ Expected status 'injured', got {player_response.get('status')}")
+                    return False
+                if not player_response.get('injury_notes'):
+                    print(f"❌ Missing injury_notes")
+                    return False
+                print(f"   Verified: Jersey #{player_response.get('jersey_number')}, Status: {player_response.get('status')}")
+        
+        return success and success2
+
+    def test_bulk_attendance(self):
+        """Test bulk attendance endpoint"""
+        if not self.group_id or not self.player_id:
+            print("⚠️ Skipping bulk attendance test - missing group or player")
+            return True
+
+        today = date.today().isoformat()
+        player_ids = [self.player_id]
+        if hasattr(self, 'injured_player_id') and self.injured_player_id:
+            player_ids.append(self.injured_player_id)
+        
+        # Test bulk attendance creation
+        success, response = self.run_test(
+            "Create Bulk Attendance",
+            "POST",
+            "api/attendance/bulk",
+            200,
+            params={
+                "group_id": self.group_id,
+                "date": today,
+                "status": "present"
+            },
+            data=player_ids
+        )
+        
+        if success and response:
+            required_fields = ['message', 'created', 'total']
+            for field in required_fields:
+                if field not in response:
+                    print(f"❌ Missing field in bulk attendance response: {field}")
+                    return False
+            print(f"   Bulk attendance: Created={response.get('created')}, Total={response.get('total')}")
+        
+        return success
+
     def cleanup(self):
         """Clean up test data"""
         print("\n🧹 Cleaning up test data...")
