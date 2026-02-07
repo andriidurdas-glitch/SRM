@@ -136,6 +136,8 @@ const Players = () => {
       group_id: player.group_id || '',
       notes: player.notes || '',
       jersey_number: player.jersey_number || '',
+      status: player.status || 'active',
+      injury_notes: player.injury_notes || '',
     });
     setDialogOpen(true);
   };
