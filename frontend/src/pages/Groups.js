@@ -12,10 +12,13 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Groups = () => {
   const [groups, setGroups] = useState([]);
+  const [groupStats, setGroupStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentGroup, setCurrentGroup] = useState(null);
+  const [statsDialogOpen, setStatsDialogOpen] = useState(false);
+  const [selectedGroupStats, setSelectedGroupStats] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     schedule: '',
