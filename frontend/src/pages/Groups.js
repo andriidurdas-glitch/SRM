@@ -33,6 +33,16 @@ const Groups = () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/groups`);
       setGroups(response.data);
+      
+      // Fetch stats for each group
+      const statsPromises = response.data.map(group =>
+        axios.get(`${BACKEND_URL}/api/statistics/group/${group.id}`)
+          .then(res => ({ [group.id]: res.data }))
+          .catch(() => ({ [group.id]: null }))
+      );
+      const statsResults = await Promise.all(statsPromises);
+      const statsMap = Object.assign({}, ...statsResults);
+      setGroupStats(statsMap);
     } catch (error) {
       toast.error('Помилка завантаження груп');
     } finally {
