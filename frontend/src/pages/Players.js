@@ -97,6 +97,7 @@ const Players = () => {
       parent_contact: player.parent_contact,
       group_id: player.group_id || '',
       notes: player.notes || '',
+      jersey_number: player.jersey_number || '',
     });
     setDialogOpen(true);
   };
