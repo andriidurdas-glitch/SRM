@@ -419,8 +419,29 @@ async def get_player_stats(player_id: str):
     absent_count = sum(1 for a in all_attendance if a['status'] == 'absent')
     attendance_rate = (present_count / total_sessions * 100) if total_sessions > 0 else 0
     
+    # Get last attendance date
+    last_attendance = None
+    if all_attendance:
+        sorted_attendance = sorted(all_attendance, key=lambda x: x['date'], reverse=True)
+        present_records = [a for a in sorted_attendance if a['status'] == 'present']
+        if present_records:
+            last_attendance = present_records[0]['date']
+    
     payments = await db.payments.find({"player_id": player_id}, {"_id": 0}).to_list(1000)
     total_paid = sum(p['amount'] for p in payments)
+    
+    # Check if player has debt this month
+    current_month = date.today().strftime("%Y-%m")
+    month_payments = [p for p in payments if p['month'] == current_month]
+    has_debt = len(month_payments) == 0
+    
+    # Get player's group to check expected fee
+    player = await db.players.find_one({"id": player_id}, {"_id": 0})
+    debt_amount = 0
+    if player and player.get('group_id') and has_debt:
+        group = await db.groups.find_one({"id": player['group_id']}, {"_id": 0})
+        if group:
+            debt_amount = group.get('monthly_fee', 0)
     
     return {
         "player_id": player_id,
@@ -429,7 +450,10 @@ async def get_player_stats(player_id: str):
         "absent_count": absent_count,
         "attendance_rate": round(attendance_rate, 1),
         "total_paid": total_paid,
-        "payment_count": len(payments)
+        "payment_count": len(payments),
+        "last_attendance": last_attendance,
+        "has_debt": has_debt,
+        "debt_amount": debt_amount
     }
 
 @api_router.get("/statistics/group/{group_id}")
