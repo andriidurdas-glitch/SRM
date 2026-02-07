@@ -10,6 +10,7 @@ import Finance from '@/pages/Finance';
 import Schedule from '@/pages/Schedule';
 import Statistics from '@/pages/Statistics';
 import GroupAnalytics from '@/pages/GroupAnalytics';
+import Leads from '@/pages/Leads';
 import Layout from '@/components/Layout';
 import '@/App.css';
 
