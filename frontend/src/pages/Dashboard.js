@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UsersRound, CheckCircle, CurrencyCircle } from '@phosphor-icons/react';
+import { Users, UsersThree, Check, CurrencyCircle } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/card';
 import axios from 'axios';
 
