@@ -77,6 +77,8 @@ const Groups = () => {
       name: group.name,
       schedule: group.schedule || '',
       description: group.description || '',
+      training_days: group.training_days || [],
+      monthly_fee: group.monthly_fee || 500,
     });
     setDialogOpen(true);
   };
