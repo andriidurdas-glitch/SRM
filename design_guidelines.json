@@ -1,0 +1,140 @@
+{
+  "identity": {
+    "name": "E1 Sport Dashboard",
+    "persona": "E1 - The Anti-AI Designer",
+    "tone": "Energetic, Precise, Tactical, Professional",
+    "theme_mode": "light",
+    "branding_inspiration": "FC Shakhtar Donetsk (Orange & Black)"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Oswald, sans-serif",
+      "body": "Manrope, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold uppercase tracking-tight",
+      "h2": "text-3xl md:text-4xl font-semibold uppercase tracking-tight",
+      "h3": "text-2xl md:text-3xl font-medium uppercase",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm font-medium tracking-wide text-muted-foreground",
+      "caption": "text-xs font-bold uppercase tracking-widest text-muted-foreground"
+    },
+    "installation": "Import 'Oswald' and 'Manrope' from Google Fonts in index.css"
+  },
+  "colors": {
+    "palette": {
+      "background": "#F4F4F5",
+      "foreground": "#18181B",
+      "card": "#FFFFFF",
+      "card_foreground": "#18181B",
+      "primary": "#FF6600",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#18181B",
+      "secondary_foreground": "#FFFFFF",
+      "muted": "#F4F4F5",
+      "muted_foreground": "#71717A",
+      "accent": "#FFF7ED",
+      "accent_foreground": "#FF6600",
+      "destructive": "#EF4444",
+      "destructive_foreground": "#FFFFFF",
+      "border": "#E4E4E7",
+      "input": "#E4E4E7",
+      "ring": "#FF6600"
+    },
+    "usage_rules": [
+      "Use #FF6600 (Orange) for Primary Actions (Buttons, Active States).",
+      "Use #18181B (Black) for Secondary Buttons, Headings, and Strong Accents.",
+      "Background should be off-white (#F4F4F5) to reduce eye strain compared to pure white.",
+      "Cards must be pure white (#FFFFFF) with a subtle shadow to pop against the background.",
+      "NEVER use gradients on text. Keep text high-contrast.",
+      "Success states should use Emerald (#10B981), Error states Red (#EF4444)."
+    ]
+  },
+  "layout": {
+    "spacing_system": "Comfortable but dense for data. Use p-4 for mobile, p-6 or p-8 for desktop containers.",
+    "border_radius": "rounded-sm (4px) - Tactical, sporty feel. Avoid large rounded corners.",
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "mobile_first": "True. Design for 375px width first. Use Bottom Navigation for mobile view.",
+    "container_width": "max-w-7xl mx-auto px-4 md:px-8",
+    "structure": {
+      "dashboard": "Grid Layout: Hero Widget (Full width mobile, 2/3 desktop), Quick Stats (1/3), List Feeds (Vertical).",
+      "sidebar": "Collapsible sidebar on desktop, Bottom Tab Bar on mobile."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-white hover:bg-orange-600 rounded-sm font-bold uppercase tracking-wide shadow-sm transition-transform active:scale-95",
+      "secondary": "bg-secondary text-white hover:bg-zinc-800 rounded-sm font-medium",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/10 rounded-sm font-bold uppercase"
+    },
+    "cards": {
+      "default": "bg-white border border-zinc-200 rounded-sm shadow-sm p-5 hover:shadow-md transition-shadow",
+      "interactive": "cursor-pointer hover:border-primary/50 transition-colors"
+    },
+    "inputs": {
+      "default": "bg-white border-zinc-200 focus:ring-2 focus:ring-primary/20 rounded-sm h-10 px-3",
+      "label": "text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "transitions": {
+      "default": "transition={{ duration: 0.2, ease: 'easeOut' }}",
+      "hover": "whileHover={{ y: -2 }}",
+      "tap": "whileTap={{ scale: 0.98 }}"
+    },
+    "rules": [
+      "Use 'LayoutGroup' for smooth list reordering.",
+      "Stagger children animations for lists (0.05s delay).",
+      "Page transitions: simple opacity fade-in (0.3s)."
+    ]
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "style": "Duotone or Regular",
+    "usage": "Use Duotone for decorative/large icons, Regular for UI controls. Color: Primary or Foreground."
+  },
+  "visual_enhancers": {
+    "textures": "Subtle dot pattern on Dashboard Hero background (opacity 0.05).",
+    "shadows": "shadow-sm for cards, shadow-lg for floating elements (modals, bottom nav).",
+    "borders": "1px solid borders are preferred over shadows for separation in data tables."
+  },
+  "images": {
+    "hero_coach": {
+      "url": "https://images.unsplash.com/photo-1761258772330-7de60cf3f07f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHw0fHxmb290YmFsbCUyMGNvYWNoJTIwdHJhaW5pbmclMjBmaWVsZHxlbnwwfHx8fDE3NzA0OTkzNjh8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Coach watching team"
+    },
+    "youth_team": {
+      "url": "https://images.unsplash.com/photo-1695054486203-fea2173902ee?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHw0fHx5b3V0aCUyMHNvY2NlciUyMHRlYW0lMjBodWRkbGV8ZW58MHx8fHwxNzcwNDk5MzY5fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Youth team huddle"
+    },
+    "soccer_ball": {
+      "url": "https://images.unsplash.com/photo-1761053275879-2805cd54353a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxzb2NjZXIlMjBiYWxsJTIwb24lMjBncmFzcyUyMHN0YWRpdW18ZW58MHx8fHwxNzcwNDk5MzcwfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Soccer ball on turf"
+    },
+    "stadium_bg": {
+      "url": "https://images.unsplash.com/photo-1660462499851-0a6d9ba77a4b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBmb290YmFsbCUyMHN0YWRpdW0lMjBlbXB0eXxlbnwwfHx8fDE3NzA0OTkzNzB8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Empty stadium background"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Install 'Oswald' and 'Manrope' fonts immediately.",
+    "Install '@phosphor-icons/react' and 'recharts'.",
+    "Configure Tailwind with the provided color palette and border radius.",
+    "Create a 'Layout' component that handles the Sidebar (Desktop) / BottomNav (Mobile) logic.",
+    "Use 'rounded-sm' consistently. Do NOT mix rounded-xl and rounded-sm.",
+    "Ensure the Primary Orange (#FF6600) is used for high-priority actions only.",
+    "Charts should use the Primary Orange for the main data series and Zinc-800 for secondary.",
+    "Use the provided image URLs for the Dashboard Hero and Login Page background.",
+    "Implement a 'PWA-ready' feel: sticky headers, bottom navigation, touch-friendly tap targets."
+  ],
+  "universal_guidelines": [
+    "Do not use generic centered layouts.",
+    "Use glass-morphism effects for the Bottom Navigation bar (backdrop-blur-lg).",
+    "Add 'data-testid' to all interactive elements.",
+    "Use 'sonner' for toast notifications.",
+    "Dark colors look good when used independently without gradients.",
+    "NEVER use AI assistant emojis."
+  ]
+}
