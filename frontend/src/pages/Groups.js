@@ -23,6 +23,8 @@ const Groups = () => {
     name: '',
     schedule: '',
     description: '',
+    training_days: [],
+    monthly_fee: 500,
   });
 
   useEffect(() => {
