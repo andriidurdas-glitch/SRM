@@ -177,6 +177,10 @@ async def get_groups():
     for group in groups:
         count = await db.players.count_documents({"group_id": group['id']})
         group['player_count'] = count
+        if 'training_days' not in group:
+            group['training_days'] = []
+        if 'monthly_fee' not in group:
+            group['monthly_fee'] = 0.0
     return groups
 
 @api_router.get("/groups/{group_id}", response_model=Group)
