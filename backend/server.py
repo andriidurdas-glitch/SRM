@@ -41,6 +41,8 @@ class GroupCreate(BaseModel):
     name: str
     schedule: Optional[str] = ""
     description: Optional[str] = ""
+    training_days: Optional[List[int]] = []
+    monthly_fee: Optional[float] = 0.0
 
 class Group(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -48,6 +50,8 @@ class Group(BaseModel):
     name: str
     schedule: Optional[str] = ""
     description: Optional[str] = ""
+    training_days: Optional[List[int]] = []
+    monthly_fee: Optional[float] = 0.0
     player_count: int = 0
     created_at: str
 
