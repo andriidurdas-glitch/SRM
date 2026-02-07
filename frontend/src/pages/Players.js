@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash, UserCircle, ArrowLeft, UsersThree, MagnifyingGlass, SortAscending, Warning } from '@phosphor-icons/react';
+import { Plus, Pencil, Trash, UserCircle, ArrowLeft, UsersThree, MagnifyingGlass, SortAscending, Warning, Phone, PaperPlaneTilt, FirstAidKit } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
