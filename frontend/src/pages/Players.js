@@ -407,10 +407,18 @@ const Players = () => {
         {filteredPlayers.map((player) => {
           const stats = playerStats[player.id];
           return (
-            <Card key={player.id} data-testid={`player-card-${player.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5 relative">
+            <Card key={player.id} data-testid={`player-card-${player.id}`} className={`bg-white border rounded-sm shadow-sm p-5 relative ${
+              player.status === 'injured' ? 'border-orange-400' : 
+              player.status === 'inactive' ? 'border-zinc-300 opacity-70' : 'border-zinc-200'
+            }`}>
               {stats?.has_debt && stats.debt_amount > 0 && (
                 <div className="absolute top-2 right-2 bg-destructive/10 p-1 rounded-sm" title={`Борг: ${stats.debt_amount}₴`}>
                   <Warning size={20} weight="fill" className="text-destructive" />
+                </div>
+              )}
+              {player.status === 'injured' && (
+                <div className="absolute top-2 right-12 bg-orange-100 p-1 rounded-sm" title={player.injury_notes || 'Травмований'}>
+                  <FirstAidKit size={20} weight="fill" className="text-orange-600" />
                 </div>
               )}
               <div className="flex items-start gap-4">
@@ -422,7 +430,36 @@ const Players = () => {
                     {player.full_name}{player.jersey_number ? ` — №${player.jersey_number}` : ''}
                   </h3>
                   <p className="text-sm text-muted-foreground">Рік: {player.birth_year}</p>
-                  <p className="text-sm text-muted-foreground truncate">{player.parent_contact}</p>
+                  <div className="flex gap-2 mt-2">
+                    <a
+                      href={`tel:${player.parent_contact}`}
+                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Phone size={16} weight="fill" />
+                      {player.parent_contact}
+                    </a>
+                    <a
+                      href={`https://t.me/${player.parent_contact.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <PaperPlaneTilt size={16} weight="fill" />
+                      Telegram
+                    </a>
+                  </div>
+                  {player.status !== 'active' && (
+                    <div className={`mt-2 px-2 py-1 rounded-sm text-xs font-bold uppercase inline-block ${
+                      player.status === 'injured' ? 'bg-orange-100 text-orange-700' : 'bg-zinc-200 text-zinc-700'
+                    }`}>
+                      {player.status === 'injured' ? '⚠️ Травмований' : '○ Вибув'}
+                    </div>
+                  )}
+                  {player.status === 'injured' && player.injury_notes && (
+                    <p className="text-xs text-orange-600 mt-1">{player.injury_notes}</p>
+                  )}
                 </div>
               </div>
               
