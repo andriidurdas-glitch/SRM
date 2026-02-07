@@ -26,6 +26,7 @@ class PlayerCreate(BaseModel):
     parent_contact: str
     group_id: Optional[str] = None
     notes: Optional[str] = ""
+    jersey_number: Optional[int] = None
 
 class Player(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -35,6 +36,7 @@ class Player(BaseModel):
     parent_contact: str
     group_id: Optional[str] = None
     notes: Optional[str] = ""
+    jersey_number: Optional[int] = None
     created_at: str
 
 class GroupCreate(BaseModel):
