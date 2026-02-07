@@ -14,7 +14,7 @@ const Layout = ({ children, onLogout }) => {
     { name: 'Відвідуваність', path: '/attendance', icon: ClipboardText },
     { name: 'Фінанси', path: '/finance', icon: Wallet },
     { name: 'Розклад', path: '/schedule', icon: Calendar },
-    { name: 'Статистика', path: '/statistics', icon: ChartBar },
+    { name: 'Аналітика', path: '/group-analytics', icon: ChartBar },
   ];
 
   const isActive = (path) => location.pathname === path;
