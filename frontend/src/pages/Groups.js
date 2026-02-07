@@ -1,0 +1,226 @@
+import React, { useState, useEffect } from 'react';
+import { Plus, Pencil, Trash, UsersThree } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+const Groups = () => {
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentGroup, setCurrentGroup] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    schedule: '',
+    description: '',
+  });
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/groups`);
+      setGroups(response.data);
+    } catch (error) {
+      toast.error('Помилка завантаження груп');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editMode && currentGroup) {
+        await axios.put(`${BACKEND_URL}/api/groups/${currentGroup.id}`, formData);
+        toast.success('Групу оновлено');
+      } else {
+        await axios.post(`${BACKEND_URL}/api/groups`, formData);
+        toast.success('Групу додано');
+      }
+      setDialogOpen(false);
+      resetForm();
+      fetchGroups();
+    } catch (error) {
+      toast.error('Помилка збереження');
+    }
+  };
+
+  const handleEdit = (group) => {
+    setEditMode(true);
+    setCurrentGroup(group);
+    setFormData({
+      name: group.name,
+      schedule: group.schedule || '',
+      description: group.description || '',
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Ви впевнені, що хочете видалити групу?')) return;
+    try {
+      await axios.delete(`${BACKEND_URL}/api/groups/${id}`);
+      toast.success('Групу видалено');
+      fetchGroups();
+    } catch (error) {
+      toast.error('Помилка видалення');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      schedule: '',
+      description: '',
+    });
+    setEditMode(false);
+    setCurrentGroup(null);
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Завантаження...</div>;
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto" data-testid="groups-page">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight">
+            Групи
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wider">
+            Управління тренувальними групами
+          </p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) resetForm();
+        }}>
+          <DialogTrigger asChild>
+            <Button
+              data-testid="add-group-button"
+              className="bg-primary text-white hover:bg-orange-600 rounded-sm font-bold uppercase tracking-wide"
+            >
+              <Plus size={20} weight="bold" className="mr-2" />
+              Додати
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-2xl font-bold uppercase">
+                {editMode ? 'Редагувати групу' : 'Додати групу'}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Назва групи</Label>
+                <Input
+                  data-testid="group-name-input"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="rounded-sm"
+                  placeholder="Наприклад: U-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Розклад</Label>
+                <Input
+                  data-testid="group-schedule-input"
+                  value={formData.schedule}
+                  onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
+                  className="rounded-sm"
+                  placeholder="Наприклад: Пн, Ср, Пт 18:00-19:30"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Опис</Label>
+                <textarea
+                  data-testid="group-description-input"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full bg-white border border-zinc-200 rounded-sm p-3 min-h-[80px]"
+                  placeholder="Додаткова інформація про групу"
+                />
+              </div>
+              <Button
+                type="submit"
+                data-testid="group-submit-button"
+                className="w-full bg-primary text-white hover:bg-orange-600 rounded-sm font-bold uppercase"
+              >
+                {editMode ? 'Оновити' : 'Додати'}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {groups.map((group) => (
+          <Card key={group.id} data-testid={`group-card-${group.id}`} className="bg-white border border-zinc-200 rounded-sm shadow-sm p-5">
+            <div className="flex items-start gap-4">
+              <div className="bg-zinc-100 p-3 rounded-sm">
+                <UsersThree size={32} weight="duotone" className="text-zinc-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-heading text-xl font-bold truncate">{group.name}</h3>
+                <p className="text-sm text-muted-foreground">Гравців: {group.player_count}</p>
+              </div>
+            </div>
+            {group.schedule && (
+              <div className="mt-4 p-3 bg-accent rounded-sm">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Розклад</p>
+                <p className="text-sm text-foreground">{group.schedule}</p>
+              </div>
+            )}
+            {group.description && (
+              <div className="mt-3 p-3 bg-muted rounded-sm">
+                <p className="text-xs text-muted-foreground">{group.description}</p>
+              </div>
+            )}
+            <div className="flex gap-2 mt-4">
+              <Button
+                onClick={() => handleEdit(group)}
+                data-testid={`edit-group-${group.id}`}
+                variant="outline"
+                size="sm"
+                className="flex-1 rounded-sm border-2 border-primary text-primary hover:bg-primary/10"
+              >
+                <Pencil size={16} className="mr-1" />
+                Редагувати
+              </Button>
+              <Button
+                onClick={() => handleDelete(group.id)}
+                data-testid={`delete-group-${group.id}`}
+                variant="outline"
+                size="sm"
+                className="rounded-sm border-2 border-destructive text-destructive hover:bg-destructive/10"
+              >
+                <Trash size={16} />
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {groups.length === 0 && (
+        <Card className="bg-white border border-zinc-200 rounded-sm shadow-sm p-8 text-center">
+          <UsersThree size={64} className="mx-auto text-muted-foreground mb-4" weight="duotone" />
+          <p className="text-muted-foreground">Груп ще немає. Створіть першу!</p>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default Groups;
