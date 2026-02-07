@@ -208,11 +208,50 @@ async def delete_group(group_id: str):
 
 @api_router.post("/attendance", response_model=Attendance)
 async def create_attendance(attendance: AttendanceCreate):
+    # Validate that the date is a training day
+    group = await db.groups.find_one({"id": attendance.group_id}, {"_id": 0})
+    if group and group.get('training_days'):
+        attendance_date = datetime.fromisoformat(attendance.date)
+        weekday = attendance_date.weekday()
+        if weekday not in group['training_days']:
+            raise HTTPException(status_code=400, detail=f"Немає тренування в цей день. Тренування проводяться: {group['training_days']}")
+    
+    # Check if attendance already exists
+    existing = await db.attendance.find_one({
+        "player_id": attendance.player_id,
+        "date": attendance.date
+    }, {"_id": 0})
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Відвідуваність вже відмічена для цього гравця в цей день")
+    
     doc = attendance.model_dump()
     doc['id'] = str(ObjectId())
     doc['created_at'] = datetime.now(timezone.utc).isoformat()
     await db.attendance.insert_one(doc)
     return Attendance(**doc)
+
+@api_router.put("/attendance/{attendance_id}", response_model=Attendance)
+async def update_attendance(attendance_id: str, status: str, notes: Optional[str] = ""):
+    if status not in ["present", "absent"]:
+        raise HTTPException(status_code=400, detail="Статус має бути 'present' або 'absent'")
+    
+    result = await db.attendance.update_one(
+        {"id": attendance_id},
+        {"$set": {"status": status, "notes": notes}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Відвідуваність не знайдено")
+    
+    updated = await db.attendance.find_one({"id": attendance_id}, {"_id": 0})
+    return Attendance(**updated)
+
+@api_router.delete("/attendance/{attendance_id}")
+async def delete_attendance(attendance_id: str):
+    result = await db.attendance.delete_one({"id": attendance_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Відвідуваність не знайдено")
+    return {"message": "Відвідуваність видалено"}
 
 @api_router.get("/attendance", response_model=List[Attendance])
 async def get_attendance(date: Optional[str] = None, group_id: Optional[str] = None, player_id: Optional[str] = None):
