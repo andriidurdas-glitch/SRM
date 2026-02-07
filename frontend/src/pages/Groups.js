@@ -99,9 +99,20 @@ const Groups = () => {
       name: '',
       schedule: '',
       description: '',
+      training_days: [],
+      monthly_fee: 500,
     });
     setEditMode(false);
     setCurrentGroup(null);
+  };
+
+  const toggleTrainingDay = (day) => {
+    const days = [...formData.training_days];
+    if (days.includes(day)) {
+      setFormData({ ...formData, training_days: days.filter(d => d !== day) });
+    } else {
+      setFormData({ ...formData, training_days: [...days, day] });
+    }
   };
 
   const viewGroupStats = (groupId) => {
