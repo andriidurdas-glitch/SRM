@@ -186,6 +186,10 @@ async def get_group(group_id: str):
         raise HTTPException(status_code=404, detail="Групу не знайдено")
     count = await db.players.count_documents({"group_id": group_id})
     group['player_count'] = count
+    if 'training_days' not in group:
+        group['training_days'] = []
+    if 'monthly_fee' not in group:
+        group['monthly_fee'] = 0.0
     return group
 
 @api_router.put("/groups/{group_id}", response_model=Group)
