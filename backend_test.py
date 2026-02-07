@@ -27,7 +27,14 @@ class FootballCRMTester:
             if method == 'GET':
                 response = requests.get(url, headers=headers, params=params)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers)
+                if isinstance(data, list):
+                    # For bulk attendance, send as query params + JSON body
+                    response = requests.post(url, json=data, headers=headers, params=params)
+                else:
+                    if params:
+                        response = requests.post(url, json=data, headers=headers, params=params)
+                    else:
+                        response = requests.post(url, json=data, headers=headers)
             elif method == 'PUT':
                 response = requests.put(url, json=data, headers=headers)
             elif method == 'DELETE':
