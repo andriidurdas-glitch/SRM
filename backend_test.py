@@ -557,12 +557,30 @@ class FootballCRMTester:
         """Clean up test data"""
         print("\n🧹 Cleaning up test data...")
         
+        # Delete injured player
+        if hasattr(self, 'injured_player_id') and self.injured_player_id:
+            success, _ = self.run_test(
+                "Delete Injured Test Player",
+                "DELETE",
+                f"api/players/{self.injured_player_id}",
+                200
+            )
+        
         # Delete player
         if self.player_id:
             success, _ = self.run_test(
                 "Delete Test Player",
                 "DELETE",
                 f"api/players/{self.player_id}",
+                200
+            )
+        
+        # Delete lead
+        if hasattr(self, 'lead_id') and self.lead_id:
+            success, _ = self.run_test(
+                "Delete Test Lead",
+                "DELETE",
+                f"api/leads/{self.lead_id}",
                 200
             )
         
@@ -584,6 +602,15 @@ def main():
         auth_success = tester.test_auth_login()
         groups_success = tester.test_groups_crud()
         players_success = tester.test_players_crud()
+        
+        # New feature tests
+        leads_success = tester.test_leads_crud()
+        lead_stats_success = tester.test_lead_statistics()
+        lead_convert_success = tester.test_lead_conversion()
+        player_features_success = tester.test_player_with_features()
+        bulk_attendance_success = tester.test_bulk_attendance()
+        
+        # Existing tests
         attendance_success = tester.test_attendance()
         payments_success = tester.test_payments()
         sessions_success = tester.test_sessions()
