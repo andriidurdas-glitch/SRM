@@ -316,6 +316,13 @@ async def get_training_days(group_id: str):
         "schedule": group.get('schedule', '')
     }
 
+@api_router.delete("/attendance/{attendance_id}")
+async def delete_attendance(attendance_id: str):
+    result = await db.attendance.delete_one({"id": attendance_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Відвідуваність не знайдено")
+    return {"message": "Відвідуваність видалено"}
+
 @api_router.get("/attendance", response_model=List[Attendance])
 async def get_attendance(date: Optional[str] = None, group_id: Optional[str] = None, player_id: Optional[str] = None):
     query = {}
