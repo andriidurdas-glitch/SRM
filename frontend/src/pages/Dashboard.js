@@ -40,14 +40,14 @@ const Dashboard = () => {
     {
       title: 'Активних груп',
       value: stats.total_groups,
-      icon: UsersRound,
+      icon: UsersThree,
       color: 'text-zinc-700',
       bgColor: 'bg-zinc-100',
     },
     {
       title: 'Присутні сьогодні',
       value: stats.today_attendance,
-      icon: CheckCircle,
+      icon: Check,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
     },
