@@ -266,6 +266,19 @@ const Players = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Ігровий номер (необов'язково)</Label>
+                <Input
+                  data-testid="player-jersey-number-input"
+                  type="number"
+                  value={formData.jersey_number}
+                  onChange={(e) => setFormData({ ...formData, jersey_number: e.target.value ? parseInt(e.target.value) : '' })}
+                  className="rounded-sm"
+                  placeholder="10"
+                  min="1"
+                  max="99"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Нотатки</Label>
                 <textarea
                   data-testid="player-notes-input"
