@@ -312,6 +312,53 @@ class FootballCRMTester:
         
         return success
 
+    def test_player_statistics(self):
+        """Test player statistics endpoint"""
+        if not self.player_id:
+            print("⚠️ Skipping player statistics test - missing player")
+            return True
+
+        success, response = self.run_test(
+            "Get Player Statistics",
+            "GET",
+            f"api/statistics/player/{self.player_id}",
+            200
+        )
+        
+        if success and response:
+            required_fields = ['player_id', 'total_sessions', 'present_count', 'absent_count', 'attendance_rate', 'total_paid', 'payment_count']
+            for field in required_fields:
+                if field not in response:
+                    print(f"❌ Missing field in player stats: {field}")
+                    return False
+            print(f"   Player Stats: Attendance={response.get('attendance_rate')}%, Paid={response.get('total_paid')}₴")
+        
+        return success
+
+    def test_group_statistics(self):
+        """Test group statistics endpoint"""
+        if not self.group_id:
+            print("⚠️ Skipping group statistics test - missing group")
+            return True
+
+        success, response = self.run_test(
+            "Get Group Statistics",
+            "GET",
+            f"api/statistics/group/{self.group_id}",
+            200
+        )
+        
+        if success and response:
+            required_fields = ['group_id', 'player_count', 'total_sessions', 'total_attendance_records', 'present_count', 'absent_count', 'attendance_rate', 'total_revenue', 'player_stats']
+            for field in required_fields:
+                if field not in response:
+                    print(f"❌ Missing field in group stats: {field}")
+                    return False
+            print(f"   Group Stats: Attendance={response.get('attendance_rate')}%, Revenue={response.get('total_revenue')}₴")
+            print(f"   Player rankings: {len(response.get('player_stats', []))} players")
+        
+        return success
+
     def cleanup(self):
         """Clean up test data"""
         print("\n🧹 Cleaning up test data...")
