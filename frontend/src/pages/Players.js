@@ -247,7 +247,10 @@ const Players = () => {
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="p-3 bg-emerald-50 rounded-sm">
                     <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Відвідуваність</p>
-                    <p className="font-heading text-2xl font-bold text-emerald-600">{stats.attendance_rate}%</p>
+                    <p className={`font-heading text-2xl font-bold ${
+                      stats.attendance_rate >= 80 ? 'text-emerald-600' :
+                      stats.attendance_rate >= 60 ? 'text-orange-600' : 'text-destructive'
+                    }`}>{stats.attendance_rate}%</p>
                     <p className="text-xs text-muted-foreground">{stats.present_count}/{stats.total_sessions}</p>
                   </div>
                   <div className="p-3 bg-orange-50 rounded-sm">
