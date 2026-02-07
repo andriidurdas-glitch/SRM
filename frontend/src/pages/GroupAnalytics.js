@@ -190,7 +190,7 @@ const GroupAnalytics = () => {
               </p>
             </div>
             <div className="bg-zinc-100 p-3 rounded-sm">
-              <CurrencyCircle size={28} weight="duotone" className="text-zinc-700" />
+              <CurrencyDollar size={28} weight="duotone" className="text-zinc-700" />
             </div>
           </div>
         </Card>
