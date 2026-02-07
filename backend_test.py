@@ -11,6 +11,8 @@ class FootballCRMTester:
         self.failed_tests = []
         self.player_id = None
         self.group_id = None
+        self.lead_id = None
+        self.injured_player_id = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
         """Run a single API test"""
