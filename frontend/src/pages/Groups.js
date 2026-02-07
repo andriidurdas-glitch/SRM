@@ -190,7 +190,29 @@ const Groups = () => {
                     { day: 4, label: 'Пт' },
                     { day: 5, label: 'Сб' },
                     { day: 6, label: 'Нд' }
-                  ].map(({ day, label }) => (\n                    <Button\n                      key={day}\n                      type=\"button\"\n                      onClick={() => toggleTrainingDay(day)}\n                      className={`rounded-sm ${formData.training_days.includes(day) ? 'bg-primary text-white' : 'bg-white border border-zinc-200 text-zinc-700'}`}\n                    >\n                      {label}\n                    </Button>\n                  ))}\n                </div>\n              </div>\n              <div className=\"space-y-2\">\n                <Label className=\"text-xs font-bold uppercase tracking-wider text-zinc-500\">Оплата за місяць (₴)</Label>\n                <Input\n                  data-testid=\"group-monthly-fee-input\"\n                  type=\"number\"\n                  value={formData.monthly_fee}\n                  onChange={(e) => setFormData({ ...formData, monthly_fee: parseFloat(e.target.value) })}\n                  className=\"rounded-sm\"\n                  placeholder=\"500\"\n                />\n              </div>
+                  ].map(({ day, label }) => (
+                    <Button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleTrainingDay(day)}
+                      className={`rounded-sm ${formData.training_days.includes(day) ? 'bg-primary text-white' : 'bg-white border border-zinc-200 text-zinc-700'}`}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Оплата за місяць (₴)</Label>
+                <Input
+                  data-testid="group-monthly-fee-input"
+                  type="number"
+                  value={formData.monthly_fee}
+                  onChange={(e) => setFormData({ ...formData, monthly_fee: parseFloat(e.target.value) })}
+                  className="rounded-sm"
+                  placeholder="500"
+                />
+              </div>
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Опис</Label>
                 <textarea
