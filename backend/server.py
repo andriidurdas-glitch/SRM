@@ -164,6 +164,10 @@ async def create_group(group: GroupCreate):
     doc['id'] = str(ObjectId())
     doc['player_count'] = 0
     doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    if 'training_days' not in doc:
+        doc['training_days'] = []
+    if 'monthly_fee' not in doc:
+        doc['monthly_fee'] = 0.0
     await db.groups.insert_one(doc)
     return Group(**doc)
 
